@@ -43,16 +43,16 @@ namespace GpuStore.Controllers
 
         // POST: Cart/AddToCart
         [HttpPost]
-        [Authorize]
+
         public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
-         /*   var user = await _userManager.GetUserAsync(User);
+           var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {  
                 return Json(new { success = false, redirectUrl = Url.Action("Login", "Account", new { returnUrl = Request.Path }) });
-            }*/
+            }
 
-            var user = await _userManager.GetUserAsync(User);
+           
             int gpuId = request.GpuId;
             int quantity = request.Quantity > 0 ? request.Quantity : 1;
            

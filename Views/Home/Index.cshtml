@@ -339,7 +339,7 @@
     </form>
 </div>
 <script>
-          async function addToCart(btn, gpuId) {
+            async function addToCart(btn, gpuId) {
       const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
 
       btn.disabled = true;
@@ -352,19 +352,25 @@
           body: JSON.stringify({ gpuId: gpuId, quantity: quantity })
         });
 
-        // Handle auth redirect (302 or 401)
-        if (response.status === 401 || response.redirected) {
+        console.log('Status:', response.status);
+        console.log('Content-Type:', response.headers.get('content-type'));
+        console.log('Redirected:', response.redirected, response.url);
+
+        // Catch auth redirects — fetch auto-follows 302s to login HTML
+        if (response.redirected || response.status === 401 || response.status === 403) {
           window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
           return;
         }
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          console.error('Non-JSON response:', await response.text());
           window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
           return;
         }
 
         const result = await response.json();
+        console.log('Result:', result);
 
         if (result.redirectUrl) {
           window.location.href = result.redirectUrl;
@@ -378,19 +384,17 @@
 
         alert(result.message);
 
-        // Optionally update cart count in navbar
         const cartBadge = document.getElementById('cart-count');
         if (cartBadge && result.cartCount !== undefined) {
           cartBadge.textContent = result.cartCount;
         }
 
       } catch (err) {
-        console.error(err);
+        console.error('Fetch error:', err);
         alert('Something went wrong. Please try again.');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Add to Cart';
       }
-    }
     }
 </script>
