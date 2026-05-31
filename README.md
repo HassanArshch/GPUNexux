@@ -15,25 +15,29 @@ A dark-themed GPU e-commerce platform built with ASP.NET Core 8 MVC. Browse, fil
 | Auth | ASP.NET Identity + RBAC |
 | Frontend | HTML5, CSS3, Vanilla JS |
 
+## Architecture
+
+```text
 ┌─────────────────────────────────────┐
-│     Presentation Layer (Views)       │
-│  (Razor Views - HTML Templates)     │
+│     Presentation Layer (Views)      │
+│   Razor Views - HTML Templates      │
 └────────────────┬────────────────────┘
                  │
-┌─────────────────▼────────────────────┐
-│   Application Layer (Controllers)     │
-│  (Business Logic & Route Handling)   │
+┌────────────────▼────────────────────┐
+│   Application Layer (Controllers)   │
+│ Business Logic & Route Handling     │
 └────────────────┬────────────────────┘
                  │
-┌─────────────────▼────────────────────┐
-│     Data Access Layer (DbContext)     │
-│  (Entity Framework Core - GpuContext) │
+┌────────────────▼────────────────────┐
+│     Data Access Layer (DbContext)   │
+│ Entity Framework Core - GpuContext  │
 └────────────────┬────────────────────┘
                  │
-┌─────────────────▼────────────────────┐
-│    Persistence Layer (SQLite)         │
-│      (Physical Data Storage)          │
+┌────────────────▼────────────────────┐
+│      Persistence Layer (SQLite)     │
+│      Physical Data Storage          │
 └─────────────────────────────────────┘
+```
 ---
 
 ## Features
