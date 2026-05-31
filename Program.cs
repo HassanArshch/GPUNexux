@@ -85,6 +85,15 @@ using (var scope = app.Services.CreateScope())
         var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
         await userManager.ResetPasswordAsync(adminUser, token, "Admin@123456");
     }
+    var admin = await userManager.FindByEmailAsync("admin@gmail.com");
+
+    Console.WriteLine("USER EXISTS: " + (admin != null));
+
+    if (admin != null)
+    {
+        var hasPassword = await userManager.HasPasswordAsync(admin);
+        Console.WriteLine("HAS PASSWORD: " + hasPassword);
+    }
     var allUsers = userManager.Users.ToList();
 
     Console.WriteLine($"TOTAL USERS: {allUsers.Count}");
