@@ -1,0 +1,556 @@
+# Visual Architecture & Design Guide
+
+## System Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        GPU STORE APPLICATION                     │
+└─────────────────────────────────────────────────────────────────┘
+								  │
+					┌─────────────┴─────────────┐
+					│                           │
+			┌───────▼──────────┐      ┌───────▼──────────┐
+			│   HOME CONTROLLER │      │   CART CONTROLLER │
+			│                  │      │                  │
+			│  - Index()       │      │  - Index()       │
+			│  - Details(id)   │      │  - AddToCart()   │
+			│                  │      │  - RemoveFromCart│
+			└───────┬──────────┘      └─────────┬────────┘
+					│                           │
+		┌───────────┴───────────┐       ┌───────┴────────────┐
+		│                       │       │                    │
+	┌───▼───────────┐  ┌──────▼──────┐ │  ┌─────────────────▼─────┐
+	│  Index.cshtml │  │Details.cshtml│ │  │    Cart/Index.cshtml  │
+	│               │  │              │ │  │                       │
+	│  - GPU Grid   │  │  - Product   │ │  │  - CartItems List     │
+	│  - Filters    │  │  - Specs     │ │  │  - Totals             │
+	│  - Search     │  │  - Add Cart  │ │  │  - Checkout Link      │
+	└───────────────┘  │  - Reviews   │ │  └───────────────────────┘
+					   └──────────────┘ │
+										│
+							┌───────────▼──────────────┐
+							│    ORDER CONTROLLER      │
+							│                         │
+							│  - Checkout()           │
+							│  - MyOrders()           │
+							│  - Details()            │
+							│  - CancelOrder()        │
+							└──────────────────────────┘
+```
+
+## Page Flow Diagram
+
+```
+┌──────────────┐
+│  HOME PAGE   │
+│  (/Home/     │
+│  Index)      │
+└──────┬───────┘
+	   │
+	   ├─► [Browse] ──────────────────┐
+	   │   • Filter by brand          │
+	   │   • Filter by price          │
+	   │   • Sort by specs            │
+	   │                              │
+	   └─► [GPU Card Clicked] ────────┤
+		   • Click Image              │
+		   • Click Name               │
+		   ▼                          │
+	┌────────────────┐               │
+	│  DETAILS PAGE  │◄──────────────┘
+	│  (/Home/       │
+	│  Details/{id}) │
+	└────┬───────────┘
+		 │
+		 ├─► [View Specs]
+		 │   • General Info
+		 │   • Memory Specs
+		 │   • GPU Specs
+		 │   • Connectivity
+		 │   • Features
+		 │   • Pricing
+		 │
+		 ├─► [View Product]
+		 │   • Image
+		 │   • Price
+		 │   • Description
+		 │   • Key Features
+		 │
+		 └─► [Add to Cart]
+			 • Select quantity
+			 • Click button
+			 ▼
+	┌────────────────────┐
+	│  CART PAGE         │
+	│  (/Cart/Index)     │
+	└────┬───────────────┘
+		 │
+		 ├─► [Modify Cart]
+		 │   • Update quantities
+		 │   • Remove items
+		 │   • Clear cart
+		 │
+		 └─► [Proceed to Checkout]
+			 ▼
+	┌────────────────────┐
+	│  CHECKOUT PAGE     │
+	│  (/Order/Checkout) │
+	└────┬───────────────┘
+		 │
+		 └─► [Place Order]
+			 ▼
+	┌────────────────────┐
+	│  ORDER DETAILS     │
+	│  (/Order/Details)  │
+	└────────────────────┘
+```
+
+## Database Schema
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      DATABASE SCHEMA                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌──────────────────┐
+│      GPUs        │
+├──────────────────┤
+│ Id (PK)          │
+│ Name             │
+│ Brand            │
+│ Architecture     │
+│ ChipName         │
+│ VramGB           │
+│ VramType         │
+│ MemoryBusWidth   │
+│ CoreCount        │
+│ BaseClock        │
+│ BoostClock       │
+│ TDP              │
+│ PCIeGeneration   │
+│ PCIeLanes        │
+│ DisplayOutputs   │
+│ RayTracingSupport│
+│ DLSSSupport      │
+│ Price            │
+│ SalePrice        │
+│ IsOnSale         │
+│ InStock          │
+│ ImageUrl         │
+│ Description      │
+│ CreatedAt        │
+└──────────────────┘
+		│
+		│ (1:N)
+		│
+	┌───▼─────────────────┐
+	│  CartItems          │
+	├─────────────────────┤
+	│ Id (PK)             │
+	│ CartId (FK)         │
+	│ GpuId (FK) ────────►│ GPUs.Id
+	│ Quantity            │
+	│ Price               │
+	│ AddedAt             │
+	└─────────────────────┘
+
+
+┌──────────────────┐
+│    Carts         │
+├──────────────────┤
+│ Id (PK)          │
+│ UserId (FK)      │
+│ CreatedAt        │
+│ UpdatedAt        │
+└──────┬───────────┘
+	   │
+	   │ (1:N)
+	   │
+	┌──▼────────────────┐
+	│ CartItems (above) │
+	└───────────────────┘
+
+
+┌──────────────────┐
+│  ApplicationUser │
+├──────────────────┤
+│ Id (PK)          │
+│ FirstName        │
+│ LastName         │
+│ Email            │
+│ Address          │
+│ City             │
+│ State            │
+│ PostalCode       │
+│ Country          │
+│ CreatedAt        │
+│ LastLogin        │
+└──────┬───────────┘
+	   │
+	   ├─► (1:N) ───► Carts
+	   │
+	   └─► (1:N) ───► Orders
+
+
+┌──────────────────┐
+│    Orders        │
+├──────────────────┤
+│ Id (PK)          │
+│ UserId (FK)      │
+│ OrderNumber      │
+│ TotalAmount      │
+│ Status           │
+│ ShippingAddress  │
+│ Notes            │
+│ CreatedAt        │
+│ ShippedAt        │
+│ DeliveredAt      │
+└──────┬───────────┘
+	   │
+	   │ (1:N)
+	   │
+	┌──▼──────────────┐
+	│  OrderItems     │
+	├─────────────────┤
+	│ Id (PK)         │
+	│ OrderId (FK)    │
+	│ GpuId (FK)      │
+	│ GpuName         │
+	│ Quantity        │
+	│ UnitPrice       │
+	│ TotalPrice      │
+	└─────────────────┘
+```
+
+## Details Page Layout - Desktop
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ Breadcrumb: Store > GPU Name                                        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌────────────────────────────┐  ┌──────────────────────────────┐  │
+│  │                            │  │ NVIDIA  |  Ada Lovelace     │  │
+│  │                            │  │ ★★★★★ (4.8/5 - 124 reviews)│  │
+│  │                            │  │                             │  │
+│  │        [GPU Image]         │  │ GeForce RTX 4070 Ti Super   │  │
+│  │         /           \      │  │                             │  │
+│  │        /   [GPU]    \     │  │ $699.00    (Was $799.00)    │  │
+│  │       /             \     │  │ You save $100.00            │  │
+│  │      ┌───────────────┐   │  │                             │  │
+│  │      │    -10%       │   │  │ ✓ In Stock - Ships 24h     │  │
+│  │      │   ON SALE     │   │  │                             │  │
+│  │      └───────────────┘   │  │ Qty: [▼ 1    ]              │  │
+│  │                          │  │ [    Add to Cart           ]│  │
+│  │                          │  │                             │  │
+│  └────────────────────────────┘  │ Key Features:              │  │
+│                                   │ • 16GB GDDR6X Memory     │  │
+│                                   │ • 256-bit Memory Bus     │  │
+│                                   │ • 8,448 GPU Cores        │  │
+│                                   │ • 2340-2610 MHz Clocks   │  │
+│                                   │ • 285W TDP               │  │
+│                                   │ • PCIe 4.0 x16           │  │
+│                                   │ • ✓ Ray Tracing Support  │  │
+│                                   │ • ✓ DLSS Support         │  │
+│                                   └──────────────────────────────┘
+│
+├─────────────────────────────────────────────────────────────────────┤
+│ Full Specifications                                                  │
+│                                                                      │
+│ ┌─────────────────┐  ┌────────────────┐  ┌───────────────┐         │
+│ │ General         │  │ Memory          │  │ GPU           │         │
+│ │ ──────────      │  │ ──────────      │  │ ──────────    │         │
+│ │ Product: RTX...│  │ VRAM: 16GB      │  │ Cores: 8448  │         │
+│ │ Mfg: NVIDIA    │  │ Type: GDDR6X    │  │ Base: 2340MHz│         │
+│ │ Arch: Ada      │  │ Bus: 256-bit    │  │ Boost: 2610MHz│        │
+│ │ Chip: AD103    │  │ BW: 576 GB/s    │  │ TDP: 285W     │         │
+│ └─────────────────┘  └────────────────┘  └───────────────┘         │
+│                                                                      │
+│ ┌──────────────┐  ┌─────────────────┐  ┌──────────────────┐        │
+│ │ Connectivity │  │ Features        │  │ Pricing          │        │
+│ │ ────────── │  │ ───────────     │  │ ────────────    │        │
+│ │ PCIe Gen 4 │  │ ✓ Ray Tracing   │  │ Price: $799.00 │        │
+│ │ x16 Lanes  │  │ ✓ DLSS          │  │ Sale: $699.00  │        │
+│ │ 3x DP 1.4a │  │ DP 1.4a Output  │  │ Discount: 10%  │        │
+│ │ 1x HDMI 2.1│  │                 │  │ In Stock       │        │
+│ └──────────────┘  └─────────────────┘  └──────────────────┘        │
+│                                                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│ Product Description                                                  │
+│ ────────────────────────────────────────────────────────────────────│
+│ [Long product description text here explaining the GPU's           │
+│  capabilities, performance tier, target audience, etc.]             │
+│                                                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│ [Back to Store]                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## Details Page Layout - Mobile
+
+```
+┌──────────────────────────────┐
+│ Breadcrumb: Store > GPU Name  │
+├──────────────────────────────┤
+│                              │
+│       [GPU Image]            │
+│         /      \             │
+│        /[GPU]   \            │
+│       /          \           │
+│      ┌──────────┐            │
+│      │  -10%    │            │
+│      │ ON SALE  │            │
+│      └──────────┘            │
+│                              │
+├──────────────────────────────┤
+│ NVIDIA  |  Ada Lovelace      │
+│ ★★★★★ (4.8/5)             │
+│                              │
+│ GeForce RTX 4070 Ti Super    │
+│                              │
+│ $699.00                      │
+│ Was $799.00                  │
+│ You save $100.00             │
+│                              │
+│ ✓ In Stock - Ships 24h      │
+│                              │
+│ Qty: [▼ 1    ]               │
+│ [  Add to Cart Button  ]     │
+│                              │
+├──────────────────────────────┤
+│ Key Features:                │
+│ • 16GB GDDR6X Memory        │
+│ • 256-bit Memory Bus         │
+│ • 8,448 GPU Cores            │
+│ • 2340-2610 MHz Clocks       │
+│ • 285W TDP                   │
+│ • PCIe 4.0 x16               │
+│ • ✓ Ray Tracing Support      │
+│ • ✓ DLSS Support             │
+│                              │
+├──────────────────────────────┤
+│ General Information          │
+│ ┌────────────────────────┐   │
+│ │ Product: RTX 4070 Ti...│   │
+│ │ Mfg: NVIDIA            │   │
+│ │ Arch: Ada Lovelace     │   │
+│ │ Chip: AD103            │   │
+│ └────────────────────────┘   │
+│                              │
+│ Memory Specifications        │
+│ ┌────────────────────────┐   │
+│ │ VRAM: 16GB GDDR6X      │   │
+│ │ Bus: 256-bit           │   │
+│ │ BW: 576 GB/s           │   │
+│ └────────────────────────┘   │
+│                              │
+│ GPU Specifications           │
+│ ┌────────────────────────┐   │
+│ │ Cores: 8,448           │   │
+│ │ Base: 2340 MHz         │   │
+│ │ Boost: 2610 MHz        │   │
+│ │ TDP: 285W              │   │
+│ └────────────────────────┘   │
+│                              │
+│ Connectivity                 │
+│ ┌────────────────────────┐   │
+│ │ PCIe Gen 4, x16 Lanes  │   │
+│ │ 3x DP 1.4a             │   │
+│ │ 1x HDMI 2.1            │   │
+│ └────────────────────────┘   │
+│                              │
+│ Supported Features           │
+│ ┌────────────────────────┐   │
+│ │ ✓ Ray Tracing          │   │
+│ │ ✓ DLSS                 │   │
+│ └────────────────────────┘   │
+│                              │
+│ Pricing                      │
+│ ┌────────────────────────┐   │
+│ │ Price: $799.00         │   │
+│ │ Sale: $699.00          │   │
+│ │ Discount: 10%          │   │
+│ │ In Stock               │   │
+│ └────────────────────────┘   │
+│                              │
+│ Product Description          │
+│ ┌────────────────────────┐   │
+│ │ [Product description   │   │
+│ │  text here...]         │   │
+│ └────────────────────────┘   │
+│                              │
+│ [ Back to Store ]            │
+└──────────────────────────────┘
+```
+
+## Color Palette
+
+```
+PRIMARY COLORS
+┌────────┬──────────────┬──────────────┬──────────────────┐
+│ Color  │ Hex Value    │ RGB          │ Usage            │
+├────────┼──────────────┼──────────────┼──────────────────┤
+│ Blue   │ #007bff      │ 0, 123, 255  │ Links, accents   │
+│ Green  │ #28a745      │ 40, 167, 69  │ Success, sales   │
+│ Red    │ #dc3545      │ 220, 53, 69  │ Errors, danger   │
+│ Yellow │ #ffc107      │ 255, 193, 7  │ Warnings         │
+└────────┴──────────────┴──────────────┴──────────────────┘
+
+NEUTRAL COLORS
+┌────────┬──────────────┬──────────────┬──────────────────┐
+│ Light  │ #f8f9fa      │ 248, 249, 250│ Backgrounds      │
+│ Gray   │ #6c757d      │ 108, 117, 125│ Secondary text   │
+│ Dark   │ #333333      │ 51, 51, 51   │ Primary text     │
+│ Black  │ #000000      │ 0, 0, 0      │ Borders, shadows │
+└────────┴──────────────┴──────────────┴──────────────────┘
+
+BRAND COLORS
+┌────────┬──────────────┬──────────────┬──────────────────┐
+│ NVIDIA │ #76b900      │ 118, 185, 0  │ NVIDIA badge     │
+│ AMD    │ #ed1c24      │ 237, 28, 36  │ AMD badge        │
+│ Intel  │ #0071c5      │ 0, 113, 197  │ Intel badge      │
+└────────┴──────────────┴──────────────┴──────────────────┘
+```
+
+## Component Hierarchy
+
+```
+Details Page
+├── Breadcrumb
+│   ├── Home Link
+│   ├── Category Link
+│   └── Current Page
+│
+├── Alerts Section
+│   ├── Success Alert
+│   ├── Error Alert
+│   └── Warning Alert
+│
+├── Main Content
+│   ├── Image Section
+│   │   ├── Product Image / Placeholder
+│   │   ├── Sale Badge
+│   │   └── Out-of-Stock Overlay
+│   │
+│   └── Details Section
+│       ├── Header
+│       │   ├── Title
+│       │   ├── Brand Badge
+│       │   ├── Architecture
+│       │   └── Rating
+│       │
+│       ├── Price Section
+│       │   ├── Current Price
+│       │   ├── Original Price
+│       │   ├── Savings Amount
+│       │   └── Sale Label
+│       │
+│       ├── Stock Status
+│       │   └── In Stock / Out of Stock
+│       │
+│       ├── Add to Cart
+│       │   ├── Quantity Selector
+│       │   └── Add Button
+│       │
+│       ├── Key Features
+│       │   └── Features List
+│       │
+│       └── Description
+│           └── Product Description
+│
+├── Specifications Grid
+│   ├── General Information Card
+│   ├── Memory Specifications Card
+│   ├── GPU Specifications Card
+│   ├── Connectivity Card
+│   ├── Features Card
+│   └── Pricing Card
+│
+└── Footer
+	├── Back to Store Link
+	└── Copyright
+```
+
+## State Transitions
+
+```
+					┌──────────────┐
+					│ Initial Load │
+					└──────┬───────┘
+						   │
+					┌──────▼───────┐
+					│  Loading     │
+					│  GPU Data    │
+					└──────┬───────┘
+						   │
+					┌──────▼────────────┐
+					│  Data Loaded      │
+					│  (GPU Found = OK) │
+					└──────┬────────────┘
+						   │
+					┌──────▼──────────────┐
+	   ┌────────────►│  Display Page      │◄──────────────┐
+	   │            │  Full Details      │               │
+	   │            └──────┬─────────────┘               │
+	   │                   │                             │
+	   │         ┌─────────┴──────────┐                 │
+	   │         │                    │                 │
+	   │   ┌─────▼──────┐      ┌──────▼────────┐       │
+	   │   │ User Views │      │ User Clicks   │       │
+	   │   │ Specs      │      │ Add to Cart   │       │
+	   │   └────────────┘      └──────┬────────┘       │
+	   │                             │                 │
+	   │                      ┌──────▼──────────┐     │
+	   │                      │ Form Submitted  │     │
+	   │                      └──────┬──────────┘     │
+	   │                             │               │
+	   │                      ┌──────▼──────────┐   │
+	   │                      │ Adding to Cart  │   │
+	   │                      └──────┬──────────┘   │
+	   │                             │               │
+	   │                    ┌────────▼──────────┐  │
+	   │                    │ Success Message  │  │
+	   │                    │ Item Added!      │──┘
+	   │                    └──────────────────┘
+	   │
+	   └────────────── User Clicks Back
+```
+
+## Responsive Breakpoints
+
+```
+Mobile First Approach
+┌──────────────────────────────────────────────────────────┐
+│ < 480px          │ Small Mobile Devices                 │
+│ - Full width     │ - Compressed layout                  │
+│ - Minimal padding│ - Touch-optimized buttons            │
+│ - Large text     │ - Single column                      │
+└────────────────────────────────────────────────────────────┘
+						   ↓
+┌──────────────────────────────────────────────────────────┐
+│ 480px - 767px    │ Mobile Devices                       │
+│ - Full width     │ - Single column layout               │
+│ - Adequate padding│ - Touch-friendly spacing            │
+│ - Large buttons  │ - Readable text                      │
+└────────────────────────────────────────────────────────────┘
+						   ↓
+┌──────────────────────────────────────────────────────────┐
+│ 768px - 1199px   │ Tablet Devices                       │
+│ - Optimized width│ - Single column with wider content   │
+│ - Better spacing │ - More comfortable reading           │
+│ - Larger image   │ - Larger interaction areas           │
+└────────────────────────────────────────────────────────────┘
+						   ↓
+┌──────────────────────────────────────────────────────────┐
+│ 1200px+          │ Desktop                              │
+│ - Two columns    │ - Image on left, details on right    │
+│ - Max width      │ - Grid of spec cards                 │
+│ - Professional   │ - Multiple items visible             │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+**Last Updated**: 2024
+**Version**: 1.0
+**Status**: ✅ Complete

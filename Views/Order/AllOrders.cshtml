@@ -1,0 +1,147 @@
+@model List<GpuStore.Models.Order>
+
+@{
+    ViewData["Title"] = "All Orders - Admin - GPU Nexus";
+}
+
+<link rel="stylesheet" href="~/css/orders.css" />
+
+<div class="admin-orders-container">
+    <h1 class="orders-title">📊 All Orders (Admin)</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-orders">
+            <p>No orders found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="admin-orders-table-container">
+            <table class="admin-orders-table">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("Details", new { id = order.Id })" class="order-link">
+                                    @order.OrderNumber
+                                </a>
+                            </td>
+                            <td>
+                                @order.User?.FirstName @order.User?.LastName
+                                <br />
+                                <small>@order.User?.Email</small>
+                            </td>
+                            <td>@order.CreatedAt.ToString("MMM dd, yyyy")</td>
+                            <td>@order.Items.Count item(s)</td>
+                            <td>$@order.TotalAmount.ToString("F2")</td>
+                            <td>
+                                <form method="post" asp-action="UpdateOrderStatus" class="status-form" style="display: inline-block;">
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <select name="status" class="form-control form-control-sm status-select" onchange="this.form.submit()">
+                                        <option value="Pending" selected="@(order.Status == "Pending")">Pending</option>
+                                        <option value="Confirmed" selected="@(order.Status == "Confirmed")">Confirmed</option>
+                                        <option value="Shipped" selected="@(order.Status == "Shipped")">Shipped</option>
+                                        <option value="Delivered" selected="@(order.Status == "Delivered")">Delivered</option>
+                                        <option value="Cancelled" selected="@(order.Status == "Cancelled")">Cancelled</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", new { id = order.Id })" class="btn btn-sm btn-info">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="admin-footer">
+        <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-primary">Back to Admin</a>
+    </div>
+</div>
+
+<style>
+.admin-orders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-orders-table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.admin-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.admin-orders-table thead {
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+}
+
+.admin-orders-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.admin-orders-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-orders-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.order-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.order-link:hover {
+    text-decoration: underline;
+}
+
+.status-form {
+    display: inline-block;
+}
+
+.status-select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.admin-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+</style>

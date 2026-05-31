@@ -1,0 +1,113 @@
+/* Layout Header Navigation Styles */
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.cart-link {
+    position: relative;
+}
+
+.cart-link:hover {
+    color: #00ff00;
+}
+
+.admin-link {
+    color: #ffaa00;
+}
+
+.admin-link:hover {
+    color: #ffdd00;
+}
+
+.auth-link {
+    color: #ff6b00;
+    background: rgba(255, 107, 0, 0.08);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.auth-link:hover {
+    background: rgba(255, 107, 0, 0.15);
+    border-color: rgba(255, 107, 0, 0.4);
+    color: #ff7f2a;
+}
+
+/* Filled version matching the same orange theme */
+.register-link {
+    color: #ff6b00;
+    background: rgba(255, 107, 0, 0.12);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+    .register-link:hover {
+        background: rgba(255, 107, 0, 0.2);
+        border-color: rgba(255, 107, 0, 0.5);
+        color: #ff7f2a;
+        box-shadow: 0 5px 15px rgba(255, 107, 0, 0.2);
+        transform: translateY(-2px);
+    }
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 1px solid #00d4ff;
+    padding-left: 15px;
+}
+
+.user-name {
+    color: #b0b0b0;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.logout-link {
+    background: transparent;
+    color: #ff6b6b;
+    padding: 4px 8px;
+    font-size: 13px;
+    border: 1px solid #ff6b6b;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-link:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .header-actions {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .user-menu {
+        flex-direction: column;
+        border-left: none;
+        padding-left: 0;
+    }
+}

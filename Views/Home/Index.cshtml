@@ -1,0 +1,379 @@
+@model GpuFilterViewModel
+@{
+    ViewData["Title"] = "GPU Store";
+
+    string BrandClass(string brand) =>
+        brand.ToLower() == "nvidia" ? "nvidia" :
+        brand.ToLower() == "amd" ? "amd" : "intel";
+}
+@Html.AntiForgeryToken()
+<div class="store-page">
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="topbar">
+        <div> 
+            <h1 class="page-title">GPU Store</h1>
+            <p class="page-subtitle">
+                Browse graphics cards by brand, VRAM, price, and features.
+            </p>
+        </div>
+
+        <div class="topbar-right">
+            <span class="results-count">
+                @Model.Gpus.Count GPU@(Model.Gpus.Count != 1 ? "s" : "")
+            </span>
+        </div>
+    </div>
+
+    <form id="filter-form" method="get" action="/">
+        <div class="layout">
+
+            <!-- ===== SIDEBAR ===== -->
+            <aside class="sidebar">
+
+                <div class="sidebar-header">
+                    <h3>Filters</h3>
+
+                    <a href="/" class="reset-link">
+                        Reset
+                    </a>
+                </div>
+
+                <!-- BRAND -->
+                <div class="filter-group">
+                    <div class="filter-label">Brand</div>
+
+                    <label class="check-item">
+                        <input type="checkbox"
+                               name="nvidia"
+                               value="true"
+                        @(Model.FilterNvidia ? "checked" : "") />
+                        NVIDIA
+                    </label>
+
+                    <label class="check-item">
+                        <input type="checkbox"
+                               name="amd"
+                               value="true"
+                        @(Model.FilterAmd ? "checked" : "") />
+                        AMD
+                    </label>
+
+                    <label class="check-item">
+                        <input type="checkbox"
+                               name="intel"
+                               value="true"
+                        @(Model.FilterIntel ? "checked" : "") />
+                        Intel
+                    </label>
+                </div>
+
+                <!-- VRAM -->
+                <div class="filter-group">
+                    <div class="filter-label">VRAM</div>
+
+                    <div class="vram-options">
+                        @foreach (var vram in Model.AvailableVramOptions)
+                        {
+                            <label class="vram-pill">
+                                <input type="checkbox"
+                                       name="vram"
+                                       value="@vram"
+                                @(Model.SelectedVram.Contains(vram) ? "checked" : "") />
+
+                                <span>@vram GB</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- PRICE -->
+                <div class="filter-group">
+                    <div class="filter-label">Price Range</div>
+
+                    <div class="price-grid">
+                        <input type="number"
+                               name="minPrice"
+                               placeholder="Min"
+                               value="@Model.MinPrice"
+                               class="input" />
+
+                        <input type="number"
+                               name="maxPrice"
+                               placeholder="Max"
+                               value="@Model.MaxPrice"
+                               class="input" />
+                    </div>
+                </div>
+
+                <!-- TDP -->
+                <div class="filter-group">
+                    <div class="filter-label">Max TDP</div>
+
+                    <select asp-for="MaxTDP" class="select">
+                        <option value="">Any</option>
+                        <option value="120">≤ 120W</option>
+                        <option value="200">≤ 200W</option>
+                        <option value="300">≤ 300W</option>
+                        <option value="400">≤ 400W</option>
+                    </select>
+                </div>
+
+                <!-- FEATURES -->
+                <div class="filter-group">
+                    <div class="filter-label">Features</div>
+
+                    <label class="check-item">
+                        <input type="checkbox"
+                               name="raytracing"
+                               value="true"
+                        @(Model.RayTracing == true ? "checked" : "") />
+
+                        Ray Tracing
+                    </label>
+
+                    <label class="check-item">
+                        <input type="checkbox"
+                               name="onSaleOnly"
+                               value="true"
+                        @(Model.OnSaleOnly == true ? "checked" : "") />
+
+                        On Sale Only
+                    </label>
+                </div>
+
+                <input type="hidden"
+                       id="sort-hidden"
+                       name="sortBy"
+                       value="@Model.SortBy" />
+
+                <button type="submit" class="apply-btn">
+                    Apply Filters
+                </button>
+
+            </aside>
+
+            <!-- ===== MAIN CONTENT ===== -->
+            <main class="content">
+
+                <!-- SORT BAR -->
+                <div class="toolbar">
+
+                    <div class="active-filters">
+
+                        @if (Model.OnSaleOnly == true)
+                        {
+                            <span class="tag">On Sale</span>
+                        }
+
+                        @if (Model.RayTracing == true)
+                        {
+                            <span class="tag">Ray Tracing</span>
+                        }
+
+                        @if (Model.SelectedVram.Any())
+                        {
+                            <span class="tag">
+                                @string.Join(", ", Model.SelectedVram.Select(v => $"{v}GB"))
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="sort-box">
+                        <label>Sort</label>
+
+                        <select id="sort-select"
+                                class="select"
+                                onchange="document.getElementById('sort-hidden').value=this.value; document.getElementById('filter-form').submit()">
+
+                            <option value="price_asc" selected="@(Model.SortBy == "price_asc")">
+                                Price ↑
+                            </option>
+
+                            <option value="price_desc" selected="@(Model.SortBy == "price_desc")">
+                                Price ↓
+                            </option>
+
+                            <option value="vram_desc" selected="@(Model.SortBy == "vram_desc")">
+                                Most VRAM
+                            </option>
+
+                            <option value="boost_desc" selected="@(Model.SortBy == "boost_desc")">
+                                Fastest Clock
+                            </option>
+
+                            <option value="tdp_asc" selected="@(Model.SortBy == "tdp_asc")">
+                                Most Efficient
+                            </option>
+
+                            <option value="name_asc" selected="@(Model.SortBy == "name_asc")">
+                                A → Z
+                            </option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- GPU GRID -->
+                <div class="gpu-grid">
+
+                    @if (!Model.Gpus.Any())
+                    {
+                        <div class="empty-state">
+                            <h3>No GPUs Found</h3>
+                            <p>Try changing your filters.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var gpu in Model.Gpus)
+                        {
+                            var brandCls = BrandClass(gpu.Brand);
+
+                            <div class="gpu-card" data-gpu-id="@gpu.Id">
+
+                                <div class="image-wrap">
+                                    <a href="@Url.Action("Details", "Home", new { id = gpu.Id })" class="image-link">
+                                        @if (!string.IsNullOrEmpty(gpu.ImageUrl))
+                                        {
+                                            <img src="@gpu.ImageUrl"
+                                                 alt="@gpu.Name"
+                                                 class="main" />
+                                        }
+                                        else
+                                        {
+                                            <div class="gpu-placeholder">GPU</div>
+                                        }
+                                    </a>
+                                </div>
+
+                                <div class="card-content">
+
+                                    <div class="card-top">
+                                        <span class="brand-pill @brandCls">
+                                            @gpu.Brand
+                                        </span>
+
+                                        @if (gpu.IsOnSale)
+                                        {
+                                            <span class="sale-pill">
+                                                -@gpu.DiscountPercent%
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <h3 class="gpu-name">
+                                        <a href="@Url.Action("Details", "Home", new { id = gpu.Id })" class="gpu-name-link">
+                                            @gpu.Name
+                                        </a>
+                                    </h3>
+
+                                    <div class="specs">
+
+                                        <div class="spec">
+                                            <span>VRAM</span>
+                                            <strong>@gpu.VramGB GB</strong>
+                                        </div>
+
+                                        <div class="spec">
+                                            <span>Boost</span>
+                                            <strong>@gpu.BoostClock MHz</strong>
+                                        </div>
+
+                                        <div class="spec">
+                                            <span>TDP</span>
+                                            <strong>@gpu.TDP W</strong>
+                                        </div>
+
+                                        <div class="spec">
+                                            <span>Bus</span>
+                                            <strong>@gpu.MemoryBusWidth-bit</strong>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="card-bottom">
+
+                                        <div class="price-area">
+                                            @if (gpu.IsOnSale && gpu.SalePrice.HasValue)
+                                            {
+                                                <div class="sale-price">
+                                                    $@gpu.SalePrice.Value.ToString("N2")
+                                                </div>
+
+                                                <div class="old-price">
+                                                    $@gpu.Price.ToString("N2")
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="normal-price">
+                                                    $@gpu.Price.ToString("N2")
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <button class="cart-btn"
+                                                type="button"
+                                                data-gpu-id="@gpu.Id"
+                                                onclick="addToCart(this)"
+                                            @(!gpu.InStock ? "disabled" : "")>
+                                            @(gpu.InStock ? "Add to Cart" : "Out of Stock")
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        }
+                    }
+
+                </div>
+
+            </main>
+
+        </div>
+    </form>
+</div>
+<script>
+           async function addToCart(btn, gpuId) {
+        const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
+
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+
+        try {
+            const response = await fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gpuId: gpuId, quantity: quantity })
+            });
+
+            // If ASP.NET redirected to login page, it returns HTML not JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+
+            const result = await response.json();
+
+            if (result.redirectUrl) {
+                window.location.href = result.redirectUrl;
+                return;
+            }
+
+            alert(result.message);
+
+        } catch (err) {
+            console.error(err);
+            alert('Something went wrong. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Add to Cart';
+        }
+    }
+</script>

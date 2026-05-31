@@ -1,0 +1,134 @@
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+
+<!DOCTYPE html>
+@Html.AntiForgeryToken()
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "GPU Nexus") — GPU Nexus Store</title>
+    <meta name="csrf-token" content=" @Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/layout.css" />
+</head>
+<body>
+
+    
+
+    <!-- Main header -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo-wrap">
+                <div class="logo-icon">▣</div>
+
+                <div class="logo-text">
+                    <span class="logo-main">
+                        GPU<span class="logo-accent">NEXUS</span>
+                    </span>
+
+                    <span class="logo-sub">
+                        PERFORMANCE HARDWARE
+                    </span>
+                </div>
+            </a>
+
+           
+
+            <div class="header-actions">
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a href="@Url.Action("Index", "Cart")" class="nav-link cart-link">
+                        <span class="nav-icon"></span> Cart
+                    </a>
+
+                    <a href="@Url.Action("MyOrders", "Order")" class="nav-link">
+                        <span class="nav-icon"></span> Orders
+                    </a>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="@Url.Action("Index", "Admin")" class="nav-link admin-link">
+                            <span class="nav-icon">⚙️</span> Admin
+                        </a>
+                    }
+
+                    <div class="user-menu">
+                        <span class="user-name">👤 @User.Identity?.Name?.Split("@")[0]</span>
+                        <form method="post" asp-action="Logout" asp-controller="Account" style="display: inline;">
+                            <button type="submit" class="nav-link logout-link">Logout</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Account")" class="nav-link auth-link">
+                        <span class="nav-icon"></span> Sign In
+                    </a>
+                    <a href="@Url.Action("Register", "Account")" class="nav-link auth-link register-link">
+                        <span class="nav-icon"></span> Register
+                    </a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="site-main">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+
+            <div class="footer-col">
+                <div class="footer-logo">
+                    GPU<span>NEXUS</span>
+                </div>
+
+                <p class="footer-desc">
+                    Your source for the latest graphics cards from NVIDIA,
+                    AMD, and Intel. Built for enthusiasts.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Brands</h4>
+
+                <ul class="footer-links">
+                    <li><a href="/?amd=false&intel=false">NVIDIA GeForce</a></li>
+                    <li><a href="/?nvidia=false&intel=false">AMD Radeon</a></li>
+                    <li><a href="/?nvidia=false&amd=false">Intel Arc</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Shop</h4>
+
+                <ul class="footer-links">
+                    <li><a href="/?onSaleOnly=true">On Sale</a></li>
+                    <li><a href="/?sortBy=price_asc">Budget Cards</a></li>
+                    <li><a href="/?sortBy=price_desc">Flagship GPUs</a></li>
+                    <li><a href="/?sortBy=vram_desc">Most VRAM</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <span>
+                © @DateTime.Now.Year GPU Nexus — Built on ASP.NET Core 8 · Hosted on Railway
+            </span>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+@model AdminGpuViewModel
+@{
+    ViewData["Title"] = "Admin Panel";
+    string BrandClass(string brand) => brand.ToLower() == "nvidia" ? "nvidia" : brand.ToLower() == "amd" ? "amd" : "intel";
+}
+
+<div class="admin-layout">
+    <h1 class="admin-page-title">Admin Panel</h1>
+    <p class="admin-subtitle">GPU INVENTORY MANAGEMENT · @Model.Gpus.Count CARDS TOTAL</p>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger")">
+            @(Model.IsSuccess ? "✓" : "✗") @Model.Message
+        </div>
+    }
+
+    <div class="admin-toolbar">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">
+                @Model.Gpus.Count(g => g.InStock) in stock ·
+                @Model.Gpus.Count(g => g.IsOnSale) on sale
+            </span>
+        </div>
+        <div style="display:flex;gap:10px">
+            <a href="/Admin/Orders" class="admin-btn btn-info">
+                 Manage Orders
+            </a>
+            <a href="/Admin/Create" class="admin-btn btn-primary">
+                ＋ Add New GPU
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>GPU NAME</th>
+                    <th>BRAND</th>
+                    <th>VRAM</th>
+                    <th>BOOST</th>
+                    <th>TDP</th>
+                    <th>PRICE</th>
+                    <th>SALE PRICE</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var gpu in Model.Gpus)
+                {
+                    <tr>
+                        <td class="gpu-name-cell">@gpu.Name</td>
+                        <td>
+                            <span class="deal-brand-tag brand-@BrandClass(gpu.Brand)" style="font-size:10px">@gpu.Brand</span>
+                        </td>
+                        <td><span class="spec-val vram-val" style="font-family:var(--font-mono);font-size:12px">@gpu.VramGB GB</span></td>
+                        <td><span style="font-family:var(--font-mono);font-size:12px;color:var(--yellow)">@gpu.BoostClock</span></td>
+                        <td><span style="font-family:var(--font-mono);font-size:12px">@gpu.TDP W</span></td>
+                        <td class="price-cell">$@gpu.Price.ToString("N2")</td>
+                        <td>
+                            @if (gpu.IsOnSale && gpu.SalePrice.HasValue)
+                            {
+                                <span style="font-family:var(--font-mono);font-size:12px;color:var(--green)">$@gpu.SalePrice.Value.ToString("N2")</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-dim)">—</span>
+                            }
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:4px;flex-direction:column">
+                                <span style="font-family:var(--font-mono);font-size:10px;color:@(gpu.InStock ? "var(--green)" : "var(--red)")">
+                                    @(gpu.InStock ? "● IN STOCK" : "○ OUT OF STOCK")
+                                </span>
+                                @if (gpu.IsOnSale)
+                                {
+                                    <span style="font-family:var(--font-mono);font-size:10px;color:var(--accent)"> ON SALE</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="/Admin/Edit/@gpu.Id" class="admin-btn btn-secondary btn-sm">✏ Edit</a>
+                                <form method="post" action="/Admin/ToggleStock/@gpu.Id" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="admin-btn btn-sm @(gpu.InStock ? "btn-warning" : "btn-success")">
+                                        @(gpu.InStock ? "⊖ Stock Off" : "⊕ Stock On")
+                                    </button>
+                                </form>
+                                <form method="post" action="/Admin/Delete/@gpu.Id" class="delete-form" data-gpu-name="@gpu.Name" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="admin-btn btn-danger btn-sm">✕ Remove</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,404 @@
+@model GpuStore.Models.Cart
+
+@{
+    ViewData["Title"] = "Shopping Cart - GPU Nexus";
+}
+
+<style>
+    .cart-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .cart-title {
+        font-family: var(--font-display);
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cart-content {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .cart-items {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .cart-table thead {
+        background: var(--bg-panel);
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .cart-table th {
+        padding: 15px;
+        text-align: left;
+        color: var(--accent);
+        font-family: var(--font-display);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 12px;
+    }
+
+    .cart-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background-color var(--transition);
+    }
+
+    .cart-table tbody tr:hover {
+        background-color: var(--bg-card-hover);
+    }
+
+    .cart-table td {
+        padding: 15px;
+        vertical-align: middle;
+        color: var(--text-primary);
+    }
+
+    .product-name {
+        font-weight: 500;
+        max-width: 250px;
+        word-break: break-word;
+    }
+
+    .price, .total {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .quantity-form {
+        display: inline;
+    }
+
+    .quantity-select {
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 6px 10px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all var(--transition);
+    }
+
+    .quantity-select:hover {
+        border-color: var(--accent);
+    }
+
+    .quantity-select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .cart-summary {
+        position: sticky;
+        top: 120px;
+        height: fit-content;
+    }
+
+    .summary-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+    }
+
+    .summary-card h3 {
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        color: var(--text-secondary);
+        font-size: 13px;
+    }
+
+    .summary-row span:last-child {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .summary-card hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 15px 0;
+    }
+
+    .total-row {
+        padding: 12px 0;
+        margin-top: 8px;
+        border-top: 2px solid var(--accent);
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .total-row span:first-child {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 14px;
+    }
+
+    .total-amount {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--accent) !important;
+    }
+
+    .cart-btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-checkout {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: var(--radius-md);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .btn-checkout:hover {
+        background: var(--accent-hover);
+        box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        padding: 12px 20px;
+        border-radius: var(--radius-md);
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .btn-danger-outline {
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .btn-danger-outline:hover {
+        background: rgba(255, 61, 61, 0.1);
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .btn-remove {
+        background: rgba(255, 61, 61, 0.15);
+        color: var(--red);
+        border: 1px solid rgba(255, 61, 61, 0.3);
+        padding: 6px 12px;
+        border-radius: var(--radius-md);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-block;
+    }
+
+    .btn-remove:hover {
+        background: rgba(255, 61, 61, 0.25);
+        border-color: var(--red);
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 80px 40px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+    }
+
+    .empty-cart p {
+        font-size: 16px;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+    }
+
+    @@media ( max-width : 768px) {
+        .cart-content {
+            grid-template-columns: 1fr;
+        }
+
+        .cart-summary {
+            position: static;
+        }
+
+        .cart-table {
+            font-size: 12px;
+        }
+
+        .cart-table th, .cart-table td {
+            padding: 10px;
+        }
+
+        .cart-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+<div class="cart-container">
+    <h1 class="cart-title">Shopping Cart</h1>
+
+    @if (Model?.Items == null || !Model.Items.Any())
+    {
+        <div class="empty-cart">
+            <p>Your cart is empty. Let's go shopping!</p>
+            <a href="@Url.Action("Index", "Home")" class="btn-outline">Continue Shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-content">
+            <div class="cart-items">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="product-name">@item.GPU.Name</td>
+                                <td class="price">$@item.Price.ToString("F2")</td>
+                                <td>
+                                    <form method="post" asp-action="UpdateQuantity" class="quantity-form">
+                                        <input type="hidden" name="cartItemId" value="@item.Id" />
+                                        <select name="quantity" class="quantity-select" onchange="this.form.submit()">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (item.Quantity == i)
+                                                {
+                                                    <option value="@i" selected>@i</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i">@i</option>
+                                                }
+                                            }
+                                            @if (item.Quantity == 10)
+                                            {
+                                                <option value="10" selected>10</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="10">10</option>
+                                            }
+                                        </select>
+                                    </form>
+                                </td>
+                                <td class="total">$@((item.Quantity * item.Price).ToString("F2"))</td>
+                                <td>
+                                    <form method="post" asp-action="RemoveFromCart" style="display: inline;">
+                                        <input type="hidden" name="cartItemId" value="@item.Id" />
+                                        <button type="submit" class="btn-remove">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-card">
+                    <h3>Order Summary</h3>
+                    <div class="summary-row">
+                        <span>Items:</span>
+                        <span>@Model.TotalQuantity</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>$@Model.TotalPrice.ToString("F2")</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (Est.):</span>
+                        <span>$0.00</span>
+                    </div>
+                    <hr />
+                    <div class="summary-row total-row">
+                        <span>Total:</span>
+                        <span class="total-amount">$@Model.TotalPrice.ToString("F2")</span>
+                    </div>
+
+                    <div class="cart-btn-group">
+                        <a href="@Url.Action("Checkout", "Order")" class="btn-checkout">Proceed to Checkout</a>
+
+                        <form method="post" asp-action="ClearCart" style="display: contents;">
+                            <button type="submit" class="btn-outline btn-danger-outline"
+                                    onclick="return confirm('Are you sure you want to clear your cart?')">
+                                Clear Cart
+                            </button>
+                        </form>
+
+                        <a href="@Url.Action("Index", "Home")" class="btn-outline">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

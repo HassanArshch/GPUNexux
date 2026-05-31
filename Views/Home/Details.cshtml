@@ -1,0 +1,357 @@
+@model GpuStore.Models.GPU
+
+@{
+    ViewData["Title"] = $"{Model?.Name} - GPU Nexus";
+}
+
+<link rel="stylesheet" href="~/css/gpu-details.css" />
+
+<div class="details-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="@Url.Action("Index", "Home")">GPU Store</a>
+        <span class="separator">/</span>
+        <span class="current">@Model.Name</span>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="details-content">
+        <!-- Image Section -->
+        <div class="image-section">
+            <div class="image-wrapper">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="main" />
+                }
+                else
+                {
+                    <div class="gpu-placeholder-large">GPU</div>
+                }
+            </div>
+
+            @if (Model.IsOnSale && Model.SalePrice.HasValue)
+            {
+                <div class="sale-badge">
+                    <span class="discount">-@Model.DiscountPercent%</span>
+                    <span class="label">ON SALE</span>
+                </div>
+            }
+
+            @if (!Model.InStock)
+            {
+                <div class="out-of-stock-overlay">
+                    <span>Out of Stock</span>
+                </div>
+            }
+        </div>
+
+        <!-- Details Section -->
+        <div class="details-section">
+            <!-- Header -->
+            <div class="details-header">
+                <div class="title-area">
+                    <h1 class="gpu-name">@Model.Name</h1>
+                    <div class="brand-architecture">
+                        <span class="brand-badge">@Model.Brand</span>
+                        <span class="architecture">@Model.Architecture</span>
+                    </div>
+                </div>
+
+               
+            </div>
+
+            <!-- Price Section -->
+            <div class="price-section">
+                @if (Model.IsOnSale && Model.SalePrice.HasValue)
+                {
+                    <div class="sale-price">
+                        $@Model.SalePrice.Value.ToString("N2")
+                    </div>
+                    <div class="original-price">
+                        Originally $@Model.Price.ToString("N2")
+                    </div>
+                    <div class="savings">
+                        You save $@((Model.Price - Model.SalePrice.Value).ToString("N2"))
+                    </div>
+                }
+                else
+                {
+                    <div class="normal-price">
+                        $@Model.Price.ToString("N2")
+                    </div>
+                }
+            </div>
+
+         
+
+            <div class="add-to-cart-section">
+                <div class="quantity-selector">
+                    <label for="quantity">Quantity:</label>
+                    <select id="quantity" class="form-select">
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary btn-add-cart"
+                        onclick="addToCart(this, @Model.Id)"
+                    @(!Model.InStock ? "disabled" : "")>
+                    @(Model.InStock ? "Add to Cart" : "Out of Stock")
+                </button>
+            </div>
+
+            <!-- Key Features -->
+            <div class="key-features">
+                <h3>Key Features</h3>
+                <ul class="features-list">
+                    <li>
+                        <strong>VRAM:</strong> @Model.VramGB GB @Model.VramType
+                    </li>
+                    <li>
+                        <strong>Memory Bus:</strong> @Model.MemoryBusWidth-bit
+                    </li>
+                    <li>
+                        <strong>Core Count:</strong> @Model.CoreCount.ToString("N0") CUDA/Stream Processors
+                    </li>
+                    <li>
+                        <strong>Clock Speeds:</strong> @Model.BaseClock MHz Base / @Model.BoostClock MHz Boost
+                    </li>
+                    <li>
+                        <strong>TDP:</strong> @Model.TDP W
+                    </li>
+                    <li>
+                        <strong>PCIe:</strong> Gen @Model.PCIeGeneration x@Model.PCIeLanes
+                    </li>
+                    <li>
+                        <strong>Ray Tracing:</strong> @(Model.RayTracingSupport ? "✓ Supported" : "✗ Not Supported")
+                    </li>
+                    <li>
+                        <strong>DLSS/FSR:</strong> @(Model.DLSSSupport ? "✓ Supported" : "✗ Not Supported")
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Description -->
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="description-section">
+                    <h3>Product Description</h3>
+                    <p>@Model.Description</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Specifications Grid -->
+    <div class="specs-grid-section">
+        <h2>Full Specifications</h2>
+
+        <div class="specs-grid">
+            <!-- General Info -->
+            <div class="spec-card">
+                <h4>General Information</h4>
+                <div class="spec-item">
+                    <span class="label">Product Name:</span>
+                    <span class="value">@Model.Name</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Manufacturer:</span>
+                    <span class="value">@Model.Brand</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Architecture:</span>
+                    <span class="value">@Model.Architecture</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Chip Name:</span>
+                    <span class="value">@Model.ChipName</span>
+                </div>
+            </div>
+
+            <!-- Memory Specifications -->
+            <div class="spec-card">
+                <h4>Memory Specifications</h4>
+                <div class="spec-item">
+                    <span class="label">VRAM Capacity:</span>
+                    <span class="value">@Model.VramGB GB</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">VRAM Type:</span>
+                    <span class="value">@Model.VramType</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Memory Bus Width:</span>
+                    <span class="value">@Model.MemoryBusWidth-bit</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Memory Bandwidth:</span>
+                    <span class="value">
+                        @{
+                            double bandwidth = (Model.MemoryBusWidth / 8.0) * 1.5; // Assuming 1.5 GHz for GDDR6
+                            <text>@(bandwidth.ToString("F1")) GB/s</text>
+                        }
+                    </span>
+                </div>
+            </div>
+
+            <!-- GPU Specifications -->
+            <div class="spec-card">
+                <h4>GPU Specifications</h4>
+                <div class="spec-item">
+                    <span class="label">GPU Cores:</span>
+                    <span class="value">@Model.CoreCount.ToString("N0")</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Base Clock:</span>
+                    <span class="value">@Model.BaseClock MHz</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Boost Clock:</span>
+                    <span class="value">@Model.BoostClock MHz</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">TDP:</span>
+                    <span class="value">@Model.TDP W</span>
+                </div>
+            </div>
+
+            <!-- Connectivity -->
+            <div class="spec-card">
+                <h4>Connectivity</h4>
+                <div class="spec-item">
+                    <span class="label">PCIe Generation:</span>
+                    <span class="value">PCIe @Model.PCIeGeneration.0</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">PCIe Lanes:</span>
+                    <span class="value">x@Model.PCIeLanes</span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">Display Outputs:</span>
+                    <span class="value">@(Model.DisplayOutputs ?? "N/A")</span>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="spec-card">
+                <h4>Supported Features</h4>
+                <div class="spec-item">
+                    <span class="label">Ray Tracing:</span>
+                    <span class="value @(Model.RayTracingSupport ? "supported" : "not-supported")">
+                        @(Model.RayTracingSupport ? "✓ Supported" : "✗ Not Supported")
+                    </span>
+                </div>
+                <div class="spec-item">
+                    <span class="label">DLSS/FSR:</span>
+                    <span class="value @(Model.DLSSSupport ? "supported" : "not-supported")">
+                        @(Model.DLSSSupport ? "✓ Supported" : "✗ Not Supported")
+                    </span>
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="spec-card">
+                <h4>Pricing</h4>
+                <div class="spec-item">
+                    <span class="label">Standard Price:</span>
+                    <span class="value">${@Model.Price.ToString("N2")}</span>
+                </div>
+                @if (Model.IsOnSale && Model.SalePrice.HasValue)
+                {
+                    <div class="spec-item">
+                        <span class="label">Sale Price:</span>
+                        <span class="value sale">${@Model.SalePrice.Value.ToString("N2")}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="label">Discount:</span>
+                        <span class="value">@Model.DiscountPercent%</span>
+                    </div>
+                }
+                <div class="spec-item">
+                    <span class="label">Availability:</span>
+                    <span class="value @(Model.InStock ? "in-stock" : "out-of-stock")">
+                        @(Model.InStock ? "In Stock" : "Out of Stock")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="related-section">
+        <h2>Browse Other GPUs</h2>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">Back to Store</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add smooth scroll behavior
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+                   async function addToCart(btn, gpuId) {
+            const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
+
+            btn.disabled = true;
+            btn.textContent = 'Adding...';
+
+            try {
+                const response = await fetch('/Cart/AddToCart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gpuId: gpuId, quantity: quantity })
+                });
+
+                // If ASP.NET redirected to login page, it returns HTML not JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.redirectUrl) {
+                    window.location.href = result.redirectUrl;
+                    return;
+                }
+
+                alert(result.message);
+
+            } catch (err) {
+                console.error(err);
+                alert('Something went wrong. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Add to Cart';
+            }
+        }
+    </script>
+}

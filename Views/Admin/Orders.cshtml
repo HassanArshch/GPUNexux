@@ -1,0 +1,274 @@
+@model List<GpuStore.Models.Order>
+
+@{
+    ViewData["Title"] = "Manage Orders - Admin Panel";
+}
+
+<div class="admin-layout">
+    <h1 class="admin-page-title">📦 Order Management</h1>
+    <p class="admin-subtitle">MANAGE ORDER STATUS · @Model.Count TOTAL ORDERS</p>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            ✓ @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            ✗ @TempData["Error"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-orders" style="text-align: center; padding: 40px; background: #f5f5f5; border-radius: 8px; margin: 20px 0;">
+            <p style="color: #666; font-size: 16px;">No orders found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="orders-summary" style="display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
+            <div class="summary-card" style="background: #fff3cd; padding: 15px 20px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                <span style="font-family: var(--font-mono); font-size: 12px; color: #856404; font-weight: 600;">
+                    ⏳ PENDING
+                </span>
+                <div style="font-size: 24px; font-weight: bold; color: #856404;">
+                    @Model.Count(o => o.Status == "Pending")
+                </div>
+            </div>
+            <div class="summary-card" style="background: #d1ecf1; padding: 15px 20px; border-radius: 6px; border-left: 4px solid #17a2b8;">
+                <span style="font-family: var(--font-mono); font-size: 12px; color: #0c5460; font-weight: 600;">
+                    ✓ CONFIRMED
+                </span>
+                <div style="font-size: 24px; font-weight: bold; color: #0c5460;">
+                    @Model.Count(o => o.Status == "Confirmed")
+                </div>
+            </div>
+            <div class="summary-card" style="background: #d4edda; padding: 15px 20px; border-radius: 6px; border-left: 4px solid #28a745;">
+                <span style="font-family: var(--font-mono); font-size: 12px; color: #155724; font-weight: 600;">
+                    🚚 SHIPPED
+                </span>
+                <div style="font-size: 24px; font-weight: bold; color: #155724;">
+                    @Model.Count(o => o.Status == "Shipped")
+                </div>
+            </div>
+            <div class="summary-card" style="background: #e2e3e5; padding: 15px 20px; border-radius: 6px; border-left: 4px solid #6c757d;">
+                <span style="font-family: var(--font-mono); font-size: 12px; color: #383d41; font-weight: 600;">
+                    📦 DELIVERED
+                </span>
+                <div style="font-size: 24px; font-weight: bold; color: #383d41;">
+                    @Model.Count(o => o.Status == "Delivered")
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ORDER #</th>
+                        <th>CUSTOMER</th>
+                        <th>DATE</th>
+                        <th>ITEMS</th>
+                        <th>TOTAL</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        var isPending = order.Status == "Pending";
+                        var rowStyle = isPending ? "background-color: #fffbf0; border-left: 3px solid #ff9800;" : "";
+
+                        <tr style="@rowStyle">
+                            <td style="font-weight: 600;">
+                                @if (isPending)
+                                {
+                                    <span style="display: inline-block; background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 8px; font-weight: bold;">NEW</span>
+                                }
+                                #@order.OrderNumber
+                            </td>
+                            <td>
+                                <div style="font-weight: 500;">@order.User?.FirstName @order.User?.LastName</div>
+                                <small style="color: #666;">@order.User?.Email</small>
+                            </td>
+                            <td style="font-family: var(--font-mono); font-size: 12px;">
+                                @order.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                            </td>
+                            <td style="text-align: center; font-weight: 600;">
+                                @order.Items.Count
+                            </td>
+                            <td style="font-weight: 600; color: #27ae60;">
+                                $@order.TotalAmount.ToString("N2")
+                            </td>
+                            <td>
+                                <form method="post" asp-action="UpdateOrderStatus" asp-controller="Order" class="status-form" style="display: inline-block;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <select name="status" class="form-control form-control-sm status-select" onchange="this.form.submit()" style="
+                                        padding: 6px 8px;
+                                        border-radius: 4px;
+                                        border: 1px solid #ddd;
+                                        background: white;
+                                        font-size: 12px;
+                                        cursor: pointer;
+                                        font-weight: 500;
+                                        color: @GetStatusColor(order.Status);
+                                    ">
+                                        @if (order.Status == "Pending")
+                                        {
+                                            <option value="Pending" selected>Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else if (order.Status == "Confirmed")
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed" selected>Confirmed</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else if (order.Status == "Shipped")
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Shipped" selected>Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else if (order.Status == "Delivered")
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Delivered" selected>Delivered</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Cancelled" selected>Cancelled</option>
+                                        }
+                                    </select>
+                                </form>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "Order", new { id = order.Id })" class="admin-btn btn-secondary btn-sm">View Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="admin-footer">
+        <a href="@Url.Action("Index", "Admin")" class="admin-btn btn-outline-primary">← Back to Admin Panel</a>
+    </div>
+</div>
+
+<style>
+.orders-summary {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    flex: 1;
+    min-width: 150px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    border-left: 4px solid;
+}
+
+.status-form {
+    display: inline-block;
+}
+
+.status-select {
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.empty-orders {
+    text-align: center;
+    padding: 40px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.admin-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.admin-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+</style>
+
+@functions {
+    string GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Pending" => "#ff9800",
+            "Confirmed" => "#2196F3",
+            "Shipped" => "#4CAF50",
+            "Delivered" => "#9C27B0",
+            "Cancelled" => "#f44336",
+            _ => "#666"
+        };
+    }
+}

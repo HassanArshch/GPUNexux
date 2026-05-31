@@ -1,0 +1,203 @@
+@model GpuStore.Controllers.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Create Account - GPU Nexus";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Create Your Account</h1>
+        <p class="auth-subtitle">Join GPU Nexus and start shopping today</p>
+
+        <form method="post" asp-action="Register" class="auth-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="form-group">
+                <label asp-for="FirstName" class="form-label">First Name</label>
+                <input asp-for="FirstName" class="form-control" placeholder="John" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastName" class="form-label">Last Name</label>
+                <input asp-for="LastName" class="form-control" placeholder="Doe" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">Email Address</label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="your@email.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="At least 8 characters" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Re-enter your password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn  btn-primary btn-lg w-100">Create Account</button>
+        </form>
+
+        <div class="auth-divider">
+            <span>Already have an account?</span>
+        </div>
+
+        <a href="@Url.Action("Login")" class="btn container btn-outline-primary btn-lg w-100">Sign In</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    .auth-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: var(--bg-base);
+    }
+
+    .auth-card {
+        background: var(--bg-card);
+        border: 1px solid var(--accent);
+        border-radius: var(--radius-lg);
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .auth-title {
+        color: var(--accent);
+        font-size: 24px;
+        margin-bottom: 10px;
+        text-align: center;
+        font-family: var(--font-display);
+        font-weight: 600;
+    }
+
+    .auth-subtitle {
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 13px;
+    }
+
+    .form-control {
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 12px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        width: 100%;
+        font-family: var(--font-body);
+        transition: all var(--transition);
+    }
+
+    .form-control:focus {
+        background: var(--bg-input);
+        border-color: var(--accent);
+        color: var(--text-primary);
+        box-shadow: 0 0 10px var(--accent-glow);
+        outline: none;
+    }
+
+    .btn {
+        padding: 12px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        transition: all var(--transition);
+        border: none;
+        cursor: pointer;
+        font-family: var(--font-body);
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: #000;
+        margin-bottom: 20px;
+    }
+
+    .btn-primary:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--accent);
+        color: #000;
+    }
+
+    .auth-divider {
+        text-align: center;
+        color: var(--text-secondary);
+        margin: 20px 0;
+        font-size: 12px;
+    }
+
+    .text-danger {
+        color: var(--red);
+        font-size: 12px;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center; /* Centers horizontally */
+        align-items: center; /* Centers vertically */
+       
+    }
+
+    .alert {
+        background: rgba(255, 61, 61, 0.1);
+        border: 1px solid var(--red);
+        color: var(--red);
+        padding: 12px;
+        border-radius: var(--radius-md);
+        margin-bottom: 20px;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .btn-lg {
+        padding: 12px;
+        font-weight: 600;
+    }
+</style>

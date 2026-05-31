@@ -1,0 +1,158 @@
+@model GPU
+@{
+    ViewData["Title"] = "Edit GPU";
+}
+
+<div class="admin-layout">
+    <h1 class="admin-page-title">Edit GPU</h1>
+    <p class="admin-subtitle">UPDATING: @Model.Name.ToUpper()</p>
+
+    <div style="margin-bottom:16px">
+        <a href="/Admin" class="admin-btn btn-secondary">← Back to Inventory</a>
+    </div>
+
+    <div class="form-card">
+        <div class="form-card-header">⬡ Edit Specifications — @Model.Name</div>
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+            <div class="form-body">
+
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label class="form-label" asp-for="Name">Product Name *</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="validation-msg"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Brand">Brand *</label>
+                        <select asp-for="Brand" class="form-control">
+                            <option value="NVIDIA">NVIDIA</option>
+                            <option value="AMD">AMD</option>
+                            <option value="Intel">Intel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Architecture">Architecture</label>
+                        <input asp-for="Architecture" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="ChipName">Chip Name</label>
+                        <input asp-for="ChipName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="VramGB">VRAM (GB)</label>
+                        <input asp-for="VramGB" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="VramType">VRAM Type</label>
+                        <select asp-for="VramType" class="form-control">
+                            <option value="GDDR6">GDDR6</option>
+                            <option value="GDDR6X">GDDR6X</option>
+                            <option value="GDDR7">GDDR7</option>
+                            <option value="HBM2e">HBM2e</option>
+                            <option value="HBM3">HBM3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="MemoryBusWidth">Memory Bus (bit)</label>
+                        <select asp-for="MemoryBusWidth" class="form-control">
+                            <option value="64">64-bit</option>
+                            <option value="96">96-bit</option>
+                            <option value="128">128-bit</option>
+                            <option value="192">192-bit</option>
+                            <option value="256">256-bit</option>
+                            <option value="320">320-bit</option>
+                            <option value="384">384-bit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="CoreCount">Shader Count</label>
+                        <input asp-for="CoreCount" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="BaseClock">Base Clock (MHz)</label>
+                        <input asp-for="BaseClock" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="BoostClock">Boost Clock (MHz)</label>
+                        <input asp-for="BoostClock" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="TDP">TDP (Watts)</label>
+                        <input asp-for="TDP" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="PCIeGeneration">PCIe Generation</label>
+                        <select asp-for="PCIeGeneration" class="form-control">
+                            <option value="3">Gen 3</option>
+                            <option value="4">Gen 4</option>
+                            <option value="5">Gen 5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="PCIeLanes">PCIe Lanes</label>
+                        <select asp-for="PCIeLanes" class="form-control">
+                            <option value="4">x4</option>
+                            <option value="8">x8</option>
+                            <option value="16">x16</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="DisplayOutputs">Display Outputs</label>
+                        <input asp-for="DisplayOutputs" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Price">MSRP Price ($)</label>
+                        <input asp-for="Price" type="number" step="0.01" class="form-control" />
+                    </div>
+                    <div class="form-group" style="justify-content:flex-end">
+                        <label class="form-label">Sale Options</label>
+                        <div class="form-check-inline">
+                            <input asp-for="IsOnSale" type="checkbox" id="IsOnSale" />
+                            <label for="IsOnSale">On Sale</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="sale-price-group">
+                        <label class="form-label" asp-for="SalePrice">Sale Price ($)</label>
+                        <input asp-for="SalePrice" type="number" step="0.01" class="form-control" />
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label" asp-for="ImageUrl">Image URL</label>
+                        <input asp-for="ImageUrl" class="form-control" />
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label" asp-for="Description">Description</label>
+                        <textarea asp-for="Description" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Features</label>
+                        <div class="form-check-inline">
+                            <input asp-for="RayTracingSupport" type="checkbox" />
+                            <label asp-for="RayTracingSupport">Ray Tracing</label>
+                        </div>
+                    </div>
+                    <div class="form-group" style="justify-content:flex-end;padding-top:22px">
+                        <div class="form-check-inline">
+                            <input asp-for="DLSSSupport" type="checkbox" />
+                            <label asp-for="DLSSSupport">DLSS/FSR/XeSS</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Availability</label>
+                        <div class="form-check-inline">
+                            <input asp-for="InStock" type="checkbox" />
+                            <label asp-for="InStock">In Stock</label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-footer">
+                <button type="submit" class="admin-btn btn-primary">💾 Save Changes</button>
+                <a href="/Admin" class="admin-btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
