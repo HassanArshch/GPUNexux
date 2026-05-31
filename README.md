@@ -1,10 +1,10 @@
-# 🏗️ GPU Nexus
+# GPU Nexus
 
 A dark-themed GPU e-commerce platform built with ASP.NET Core 8 MVC. Browse, filter, and purchase graphics cards through a responsive storefront with full cart, order management, and admin panel support.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -15,9 +15,32 @@ A dark-themed GPU e-commerce platform built with ASP.NET Core 8 MVC. Browse, fil
 | Auth | ASP.NET Identity + RBAC |
 | Frontend | HTML5, CSS3, Vanilla JS |
 
+## Architecture
+
+```text
+┌─────────────────────────────────────┐
+│     Presentation Layer (Views)      │
+│   Razor Views - HTML Templates      │
+└────────────────┬────────────────────┘
+                 │
+┌────────────────▼────────────────────┐
+│   Application Layer (Controllers)   │
+│ Business Logic & Route Handling     │
+└────────────────┬────────────────────┘
+                 │
+┌────────────────▼────────────────────┐
+│     Data Access Layer (DbContext)   │
+│ Entity Framework Core - GpuContext  │
+└────────────────┬────────────────────┘
+                 │
+┌────────────────▼────────────────────┐
+│      Persistence Layer (SQLite)     │
+│      Physical Data Storage          │
+└─────────────────────────────────────┘
+```
 ---
 
-## ✨ Features
+## Features
 
 - **Storefront** — GPU listing grid with filtering, detail pages, and stock status
 - **Shopping Cart** — Add, update, remove items; quantity validation (1–100); persistent per-user
@@ -28,7 +51,7 @@ A dark-themed GPU e-commerce platform built with ASP.NET Core 8 MVC. Browse, fil
 
 ---
 
-## 🏛️ Architecture
+## Architecture
 
 ```
 GPU Nexus
@@ -72,7 +95,7 @@ The app seeds an initial Admin account and sample GPU listings on first run. Che
 
 ---
 
-## 📦 Key Endpoints
+## Key Endpoints
 
 | Route | Description |
 |---|---|
@@ -87,26 +110,11 @@ The app seeds an initial Admin account and sample GPU listings on first run. Che
 
 ---
 
-## 🔒 Security
+## Security
 
 - CSRF protection on all POST actions
 - `[Authorize]` on all cart and order routes
 - `[Authorize(Roles = "Admin")]` on admin routes
 - Server-side input validation + EF parameterized queries (SQL injection prevention)
 
----
 
-## 🗺️ Roadmap
-
-- [ ] Payment gateway integration
-- [ ] Email notifications for order status changes
-- [ ] Product image gallery
-- [ ] GPU comparison tool
-- [ ] Wishlist / saved items
-- [ ] Customer reviews and ratings
-
----
-
-## 📄 License
-
-MIT
