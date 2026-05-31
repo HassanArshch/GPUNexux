@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-
 using GpuStore.Data;
 using GpuStore.Models;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +15,8 @@ if (isProduction)
 {  
     builder.Services.AddDbContext<GpuContext>(options =>
         options.UseSqlite("Data Source=/data/gpustore.db"));
+    builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"));
 }
 else
 {
@@ -82,6 +84,14 @@ using (var scope = app.Services.CreateScope())
         // Force password reset every deploy (useful for debugging)
         var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
         await userManager.ResetPasswordAsync(adminUser, token, "Admin@123456");
+    }
+    var allUsers = userManager.Users.ToList();
+
+    Console.WriteLine($"TOTAL USERS: {allUsers.Count}");
+
+    foreach (var u in allUsers)
+    {
+        Console.WriteLine($"USER: {u.Email} | {u.UserName}");
     }
 }
 
