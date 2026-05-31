@@ -352,6 +352,24 @@
                 btn.disabled = false;
                 btn.textContent = 'Add to Cart';
             }
-        }
+        }┌─────────────────────────────────────┐
+│     Presentation Layer (Views)       │
+│  (Razor Views - HTML Templates)     │
+└────────────────┬────────────────────┘
+                 │
+┌─────────────────▼────────────────────┐
+│   Application Layer (Controllers)     │
+│  (Business Logic & Route Handling)   │
+└────────────────┬────────────────────┘
+                 │
+┌─────────────────▼────────────────────┐
+│     Data Access Layer (DbContext)     │
+│  (Entity Framework Core - GpuContext) │
+└────────────────┬────────────────────┘
+                 │
+┌─────────────────▼────────────────────┐
+│    Persistence Layer (SQLite)         │
+│      (Physical Data Storage)          │
+└─────────────────────────────────────┘
     </script>
 }
