@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 var isProduction = builder.Environment.IsProduction();
-
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true);
 if (isProduction)
 {
     
@@ -124,12 +126,8 @@ using (var scope = app.Services.CreateScope())
     }
     var allUsers = userManager.Users.ToList();
 
-    Console.WriteLine($"TOTAL USERS: {allUsers.Count}");
 
-    foreach (var u in allUsers)
-    {
-        Console.WriteLine($"USER: {u.Email} | {u.UserName}");
-    }
+   
 }
 
 if (!app.Environment.IsDevelopment())
