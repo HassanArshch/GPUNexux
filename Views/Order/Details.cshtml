@@ -114,20 +114,20 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Unit Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
+                    <th class="text-start">Product</th>
+                    <th class="text-end">Unit Price</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model.Items)
                 {
                     <tr>
-                        <td class="product-name">@item.GpuName</td>
-                        <td class="price">${item.UnitPrice:F2}</td>
-                        <td class="quantity">@item.Quantity</td>
-                        <td class="total">${item.TotalPrice:F2}</td>
+                        <td class="product-name text-start">@item.GpuName</td>
+                        <td class="price text-end">$@(item.UnitPrice.ToString("F2"))</td>
+                        <td class="quantity text-center">@item.Quantity</td>
+                        <td class="total text-end">$@(item.TotalPrice.ToString("F2"))</td>
                     </tr>
                 }
             </tbody>
@@ -138,7 +138,7 @@
         <div class="summary-card">
             <div class="summary-row">
                 <span class="label">Subtotal:</span>
-                <span class="value">${Model.TotalAmount:F2}</span>
+                <span class="value">$@(Model.TotalAmount.ToString("F2"))</span>
             </div>
             <div class="summary-row">
                 <span class="label">Shipping:</span>
@@ -151,7 +151,7 @@
             <div class="summary-divider"></div>
             <div class="summary-row total-row">
                 <span class="label">Total:</span>
-                <span class="total-amount">${Model.TotalAmount:F2}</span>
+                <span class="total-amount">$@(Model.TotalAmount.ToString("F2"))</span>
             </div>
         </div>
     </div>
@@ -170,7 +170,6 @@
         <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">Continue Shopping</a>
     </div>
 </div>
-
 <style>
     .order-details-container {
         max-width: 1000px;
@@ -189,6 +188,17 @@
         border-bottom: 2px solid var(--border);
     }
 
+    .items-table .text-start {
+        text-align: left;
+    }
+
+    .items-table .text-center {
+        text-align: center;
+    }
+
+    .items-table .text-end {
+        text-align: right;
+    }
     .order-title {
         font-size: 32px;
         color: var(--text-primary);

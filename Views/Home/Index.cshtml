@@ -318,7 +318,7 @@
                                         <button class="cart-btn"
                                                 type="button"
                                                 data-gpu-id="@gpu.Id"
-                                                onclick="addToCart(this)"
+                                                onclick="addToCart(this, @gpu.Id)"
                                             @(!gpu.InStock ? "disabled" : "")>
                                             @(gpu.InStock ? "Add to Cart" : "Out of Stock")
                                         </button>
