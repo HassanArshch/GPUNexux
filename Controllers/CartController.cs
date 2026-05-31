@@ -43,16 +43,16 @@ namespace GpuStore.Controllers
 
         // POST: Cart/AddToCart
         [HttpPost]
-
+        [Authorize]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
-            var user = await _userManager.GetUserAsync(User);
+         /*   var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {  
                 return Json(new { success = false, redirectUrl = Url.Action("Login", "Account", new { returnUrl = Request.Path }) });
-            }
-               
+            }*/
 
+            var user = await _userManager.GetUserAsync(User);
             int gpuId = request.GpuId;
             int quantity = request.Quantity > 0 ? request.Quantity : 1;
            
@@ -117,7 +117,17 @@ namespace GpuStore.Controllers
             var message = isMaxed 
                 ? $"{gpu.Name} added to cart! (Max quantity reached)"
                 : $"{gpu.Name} added to cart!";
-
+            var gpuhere = await _context.GPUs.FindAsync(gpuId);
+            if (gpuhere == null)
+            {
+                // Temporarily log what IDs exist to diagnose
+                var allIds = await _context.GPUs.Select(g => g.Id).ToListAsync();
+                return Json(new
+                {
+                    success = false,
+                    message = $"Product not found. Searched for ID {gpuId}. Available IDs: {string.Join(",", allIds)}"
+                });
+            }
             return Json(new { success = true, message = message, cartCount = totalItems });
         }
         public class AddToCartRequest

@@ -339,41 +339,58 @@
     </form>
 </div>
 <script>
-           async function addToCart(btn, gpuId) {
-        const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
+          async function addToCart(btn, gpuId) {
+      const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
 
-        btn.disabled = true;
-        btn.textContent = 'Adding...';
+      btn.disabled = true;
+      btn.textContent = 'Adding...';
 
-        try {
-            const response = await fetch('/Cart/AddToCart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ gpuId: gpuId, quantity: quantity })
-            });
+      try {
+        const response = await fetch('/Cart/AddToCart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gpuId: gpuId, quantity: quantity })
+        });
 
-            // If ASP.NET redirected to login page, it returns HTML not JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
-                return;
-            }
-
-            const result = await response.json();
-
-            if (result.redirectUrl) {
-                window.location.href = result.redirectUrl;
-                return;
-            }
-
-            alert(result.message);
-
-        } catch (err) {
-            console.error(err);
-            alert('Something went wrong. Please try again.');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Add to Cart';
+        // Handle auth redirect (302 or 401)
+        if (response.status === 401 || response.redirected) {
+          window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+          return;
         }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+          return;
+        }
+
+        const result = await response.json();
+
+        if (result.redirectUrl) {
+          window.location.href = result.redirectUrl;
+          return;
+        }
+
+        if (!result.success) {
+          alert(result.message || 'Something went wrong.');
+          return;
+        }
+
+        alert(result.message);
+
+        // Optionally update cart count in navbar
+        const cartBadge = document.getElementById('cart-count');
+        if (cartBadge && result.cartCount !== undefined) {
+          cartBadge.textContent = result.cartCount;
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert('Something went wrong. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add to Cart';
+      }
+    }
     }
 </script>
