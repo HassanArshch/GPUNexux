@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 var isProduction = builder.Environment.IsProduction();
 
 if (isProduction)
-{
+{  
     builder.Services.AddDbContext<GpuContext>(options =>
         options.UseSqlite("Data Source=/data/gpustore.db"));
 }
@@ -40,8 +40,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GpuContext>();
-    db.Database.EnsureCreated();
-
+    db.Database.Migrate();
+    Console.WriteLine($"DB exists: {File.Exists("/data/gpustore.db")}");
     // Seed admin role and user if they don't exist
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
