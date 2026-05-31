@@ -36,6 +36,13 @@ else
     builder.Services.AddDbContext<GpuContext>(options =>
         options.UseSqlite("Data Source=gpustore.db"));
 }
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.Cookie.Name = "GpuStore.Auth";
+    options.SlidingExpiration = true;
+});
 
 // Configure Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -91,9 +98,17 @@ using (var scope = app.Services.CreateScope())
         {
             await userManager.AddToRoleAsync(adminUser, "Admin");
         }
+        await userManager.SetLockoutEnabledAsync(adminUser, false);
+        // or if already locked:
+        await userManager.ResetAccessFailedCountAsync(adminUser);
+        await userManager.SetLockoutEndDateAsync(adminUser, null);
     }
     else
     {
+        await userManager.SetLockoutEnabledAsync(adminUser, false);
+        // or if already locked:
+        await userManager.ResetAccessFailedCountAsync(adminUser);
+        await userManager.SetLockoutEndDateAsync(adminUser, null);
         // Force password reset every deploy (useful for debugging)
         var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
         await userManager.ResetPasswordAsync(adminUser, token, "Admin@123456");
