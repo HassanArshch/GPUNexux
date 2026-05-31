@@ -12,11 +12,24 @@ builder.Services.AddControllersWithViews();
 var isProduction = builder.Environment.IsProduction();
 
 if (isProduction)
-{  
-    builder.Services.AddDbContext<GpuContext>(options =>
-        options.UseSqlite("Data Source=/data/gpustore.db"));
-    builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"));
+{
+    
+        // Ensure directories exist before configuring services
+        Directory.CreateDirectory("/data/keys");  // <-- add this
+        Directory.CreateDirectory("/data");       // ensure DB dir too
+
+        builder.Services.AddDbContext<GpuContext>(options =>
+            options.UseSqlite("Data Source=/data/gpustore.db"));
+
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"))
+            .SetApplicationName("GpuStore");  // <-- also add this
+
+    var keyFiles = Directory.GetFiles("/data/keys");
+    Console.WriteLine($"Data Protection key files: {keyFiles.Length}");
+    foreach (var f in keyFiles)
+        Console.WriteLine($"  Key file: {Path.GetFileName(f)}");
+
 }
 else
 {
