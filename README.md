@@ -29,6 +29,11 @@ A dark-themed GPU e-commerce platform built with ASP.NET Core 8 MVC. Browse, fil
 └────────────────┬────────────────────┘
                  │
 ┌────────────────▼────────────────────┐
+│         Domain Layer (Models)       │
+│ Entities, ViewModels, DTOs          │
+└────────────────┬────────────────────┘
+                 │
+┌────────────────▼────────────────────┐
 │     Data Access Layer (DbContext)   │
 │ Entity Framework Core - GpuContext  │
 └────────────────┬────────────────────┘
