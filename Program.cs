@@ -9,19 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddControllersWithViews();
 
-// Database - use Railway's DATABASE_URL if available, else local SQLite
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres"))
+var isProduction = builder.Environment.IsProduction();
+
+if (isProduction)
 {
-    // For Railway PostgreSQL (future upgrade path)
     builder.Services.AddDbContext<GpuContext>(options =>
         options.UseSqlite("Data Source=/data/gpustore.db"));
 }
 else
 {
-    var dbPath = Environment.GetEnvironmentVariable("DB_PATH") ?? "Data Source=gpustore.db";
     builder.Services.AddDbContext<GpuContext>(options =>
-        options.UseSqlite(dbPath));
+        options.UseSqlite("Data Source=gpustore.db"));
 }
 
 // Configure Identity
