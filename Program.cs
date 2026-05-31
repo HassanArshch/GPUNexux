@@ -69,11 +69,19 @@ using (var scope = app.Services.CreateScope())
             FirstName = "Admin",
             LastName = "User"
         };
+
         var result = await userManager.CreateAsync(adminUser, "Admin@123456");
+
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(adminUser, "Admin");
         }
+    }
+    else
+    {
+        // Force password reset every deploy (useful for debugging)
+        var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+        await userManager.ResetPasswordAsync(adminUser, token, "Admin@123456");
     }
 }
 
