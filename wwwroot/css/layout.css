@@ -92,22 +92,93 @@
     background: #ff6b6b;
     color: white;
 }
-
 @media (max-width: 768px) {
-    .header-inner {
-        flex-wrap: wrap;
-        gap: 15px;
+    .site-header {
+        padding: 0;
     }
 
+    .header-inner {
+        flex-wrap: wrap;
+        gap: 0;
+        padding: 0;
+        align-items: stretch;
+    }
+    .page-title {
+        width: 100%;
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    }
+    /* Logo row — full width, sits on top */
+    .logo-wrap {
+        width: 100%;
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    }
+
+    /* Actions row — full width, scrollable so nothing overflows */
     .header-actions {
         order: 3;
         width: 100%;
         justify-content: flex-start;
+        flex-wrap: nowrap; /* single row, scroll rather than wrap */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* hide scrollbar on Firefox */
+        gap: 6px;
+        padding: 8px 16px;
+        border-top: 1px solid rgba(0, 212, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
     }
 
+        .header-actions::-webkit-scrollbar {
+            display: none; /* hide scrollbar on Chrome/Safari */
+        }
+
+        /* Make every nav link the same compact pill */
+        .header-actions .nav-link,
+        .header-actions .auth-link,
+        .header-actions .register-link {
+            white-space: nowrap;
+            font-size: 12px;
+            padding: 5px 10px;
+            flex-shrink: 0;
+        }
+
+    /* User menu — row, no divider, tighter */
     .user-menu {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
         border-left: none;
         padding-left: 0;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .user-name {
+        font-size: 12px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .logout-link {
+        font-size: 11px;
+        padding: 3px 7px;
+        white-space: nowrap;
+    }
+}
+
+/* Tighten further on very small screens */
+@media (max-width: 380px) {
+    .user-name {
+        max-width: 80px;
+    }
+
+    .header-actions .nav-link,
+    .header-actions .auth-link,
+    .header-actions .register-link {
+        font-size: 11px;
+        padding: 4px 8px;
     }
 }
