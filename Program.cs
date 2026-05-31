@@ -39,11 +39,19 @@ else
     builder.Services.AddDbContext<GpuContext>(options =>
         options.UseSqlite("Data Source=gpustore.db"));
 }
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
+// Add this with your other service configurations
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.LoginPath = "/Account/Login";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var returnUrl = Uri.EscapeDataString(context.Request.Path);
+        context.Response.Headers["Location"] = $"https://{context.Request.Host}/Account/Login?ReturnUrl={returnUrl}";
+        context.Response.StatusCode = 302;
+        return Task.CompletedTask;
+    };
 });
 builder.Services.ConfigureApplicationCookie(options =>
 {
