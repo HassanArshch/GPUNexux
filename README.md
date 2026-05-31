@@ -71,7 +71,7 @@ GPU Nexus
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
